@@ -12,26 +12,22 @@ Heuristic = Callable[[S], float]
 
 def best_first_search(problem: SearchProblem[S], f: Callable[[Node[S]], float]) -> Optional[Node[S]]:
     """Graph search that always expands the node with the lowest f."""
-    # TODO: one line, with graph_search and a PriorityFrontier.
-    raise NotImplementedError("best_first_search")   # remove this line when you are done
+    return graph_search(problem, PriorityFrontier(f))
 
 
 def greedy_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
     """Greedy best-first search: f(n) = h(n)."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("greedy_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: h(n.state))
 
 
 def a_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
     """A*: f(n) = g(n) + h(n)."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("a_star_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: n.path_cost + h(n.state))
 
 
 def weighted_a_star_search(problem: SearchProblem[S], h: Heuristic[S], w: float) -> Optional[Node[S]]:
     """Weighted A*: f(n) = g(n) + w * h(n), with w >= 1."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("weighted_a_star_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: n.path_cost + w * h(n.state))
 
 
 def ida_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
