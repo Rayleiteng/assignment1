@@ -35,7 +35,29 @@ def ida_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node
     f = g + h. The first bound is h(initial state); each new bound is the smallest f that
     exceeded the previous one. Like depth_limited_search, it skips states already on the
     current path. Returns a goal node, or None if there is no solution."""
-    # TODO: write it, with a recursive helper function that searches
-    #       depth-first from a node within the bound, and returns either a goal node or the
-    #       smallest f above the bound that it saw (math.inf if none).
-    raise NotImplementedError("ida_star_search")   # remove this line when you are done
+    def recurse(node: Node[S], bound: float) -> Node[S] | float:
+        score = node.path_cost + h(node.state)
+        if score > bound:
+            return score
+        if problem.is_goal(node.state):
+            return node
+
+        next_bound = math.inf
+        for child in node.expand(problem):
+            if node.on_path(child.state):
+                continue
+            result = recurse(child, bound)
+            if isinstance(result, Node):
+                return result
+            next_bound = min(next_bound, result)
+        return next_bound
+
+    root = Node(problem.get_initial_state())
+    bound = h(root.state)
+    while True:
+        result = recurse(root, bound)
+        if isinstance(result, Node):
+            return result
+        if result == math.inf:
+            return None
+        bound = result
