@@ -37,44 +37,60 @@ class PancakeProblem(ReversibleSearchProblem[PancakeState]):
         return PancakeState(self.stack)
 
     def get_goal_state(self) -> PancakeState:
-        # TODO: the sorted stack.
-        raise NotImplementedError("get_goal_state")   # remove this line when you are done
+        # just return the sorted stack, which is always (1, 2, ..., n)
+        return PancakeState(tuple(range(1, len(self.stack) + 1)))
 
     def is_goal(self, state: PancakeState) -> bool:
-        # TODO:
-        raise NotImplementedError("is_goal")   # remove this line when you are done
+        # check if the current state is the goal state
+        return state == self.get_goal_state()
 
     def get_successors(self, state: PancakeState) -> Iterable[tuple[PancakeState, str]]:
-        # TODO: one successor per flip of k = 2, ..., n pancakes, with the
-        #       action "flip k".
-        raise NotImplementedError("get_successors")   # remove this line when you are done
+        # generate all possible flips of the current stack
+        for k in range(2, len(state.stack) + 1):
+            flipped = state.stack[:k][::-1] + state.stack[k:]
+            yield PancakeState(flipped), f"flip {k}"
 
     def get_predecessors(self, state: PancakeState) -> Iterable[tuple[PancakeState, str]]:
-        # TODO: which states lead to state in one flip, and with which action?
-        raise NotImplementedError("get_predecessors")   # remove this line when you are done
+        # A flip is its own inverse.
+        return self.get_successors(state)
 
     def get_action_cost(self, state: PancakeState, action: str, next_state: PancakeState) -> float:
-        # TODO: 1, or k for "flip k" when flip_cost is True.
-        raise NotImplementedError("get_action_cost")   # remove this line when you are done
+        # return the cost of the action based on whether it is flip cost or not
+        k = int(action.split()[1])
+        return float(k if self.flip_cost else 1)
 
 
 def gap_heuristic(state: PancakeState) -> float:
     """The number of gaps: pairs of adjacent pancakes whose sizes differ by more than 1.
     The plate counts as a pancake of size n + 1 under the stack."""
-    # TODO:
-    raise NotImplementedError("gap_heuristic")   # remove this line when you are done
+    # Count the number of gaps in the stack, including the plate as a pancake of size n + 1
+    stack = state.stack
+    with_plate = stack + (len(stack) + 1,)
+    return float(
+        sum(abs(a - b) > 1 for a, b in zip(with_plate, with_plate[1:]))
+    )
 
 
 def my_heuristic(state: PancakeState) -> float:
     """A heuristic of your own design, for unit-cost flips. In the report, say whether it is
     admissible and consistent, with a proof or a counterexample."""
-    # TODO: your own heuristic.
-    raise NotImplementedError("my_heuristic")   # remove this line when you are done
+    # based on the gap heuristic, but if the first pancake is 1 and the stack is not sorted, return at least 3
+    gaps = gap_heuristic(state)
+    goal = tuple(range(1, len(state.stack) + 1))
+
+    if state.stack and state.stack[0] == 1 and state.stack != goal:
+        return max(gaps, 3.0)
+    return gaps
 
 
 def flip_cost_heuristic(state: PancakeState) -> float:
     """An admissible heuristic for the variant where flipping k pancakes costs k, better
     informed than gap_heuristic. Prove its admissibility in the report."""
-    # TODO: what is the cheapest flip that can remove a gap? Which
-    #       flips can remove the gap between the bottom pancake and the plate?
-    raise NotImplementedError("flip_cost_heuristic")   # remove this line when you are done
+    # if the stack is empty, return 0. Otherwise, return 2 * gaps + (n - 2 if the last pancake is not n else 0)
+    n = len(state.stack)
+    if n == 0:
+        return 0.0
+
+    gaps = gap_heuristic(state)
+    plate_gap = state.stack[-1] != n
+    return 2 * gaps + (n - 2 if plate_gap else 0)
