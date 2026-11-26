@@ -12,26 +12,22 @@ Heuristic = Callable[[S], float]
 
 def best_first_search(problem: SearchProblem[S], f: Callable[[Node[S]], float]) -> Optional[Node[S]]:
     """Graph search that always expands the node with the lowest f."""
-    # TODO: one line, with graph_search and a PriorityFrontier.
-    raise NotImplementedError("best_first_search")   # remove this line when you are done
+    return graph_search(problem, PriorityFrontier(f))
 
 
 def greedy_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
     """Greedy best-first search: f(n) = h(n)."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("greedy_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: h(n.state))
 
 
 def a_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
     """A*: f(n) = g(n) + h(n)."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("a_star_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: n.path_cost + h(n.state))
 
 
 def weighted_a_star_search(problem: SearchProblem[S], h: Heuristic[S], w: float) -> Optional[Node[S]]:
     """Weighted A*: f(n) = g(n) + w * h(n), with w >= 1."""
-    # TODO: one line, with best_first_search.
-    raise NotImplementedError("weighted_a_star_search")   # remove this line when you are done
+    return best_first_search(problem, lambda n: n.path_cost + w * h(n.state))
 
 
 def ida_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node[S]]:
@@ -39,7 +35,29 @@ def ida_star_search(problem: SearchProblem[S], h: Heuristic[S]) -> Optional[Node
     f = g + h. The first bound is h(initial state); each new bound is the smallest f that
     exceeded the previous one. Like depth_limited_search, it skips states already on the
     current path. Returns a goal node, or None if there is no solution."""
-    # TODO: write it, with a recursive helper function that searches
-    #       depth-first from a node within the bound, and returns either a goal node or the
-    #       smallest f above the bound that it saw (math.inf if none).
-    raise NotImplementedError("ida_star_search")   # remove this line when you are done
+    def recurse(node: Node[S], bound: float) -> Node[S] | float:
+        score = node.path_cost + h(node.state)
+        if score > bound:
+            return score
+        if problem.is_goal(node.state):
+            return node
+
+        next_bound = math.inf
+        for child in node.expand(problem):
+            if node.on_path(child.state):
+                continue
+            result = recurse(child, bound)
+            if isinstance(result, Node):
+                return result
+            next_bound = min(next_bound, result)
+        return next_bound
+
+    root = Node(problem.get_initial_state())
+    bound = h(root.state)
+    while True:
+        result = recurse(root, bound)
+        if isinstance(result, Node):
+            return result
+        if result == math.inf:
+            return None
+        bound = result
