@@ -19,7 +19,13 @@ class GraphColoring(OptimizationProblem[Coloring], GeneticProblem[Coloring]):
 
     def conflicts(self, c: Coloring) -> int:
         # TODO:
-        raise NotImplementedError("conflicts")   # remove this line when you are done
+
+        count = 0;
+        for (u, v) in self.edges:
+            if (c[u] == c[v]):
+                count += 1;
+        return count;
+
 
     def cost(self, c: Coloring) -> float:
         return self.conflicts(c)
@@ -29,11 +35,24 @@ class GraphColoring(OptimizationProblem[Coloring], GeneticProblem[Coloring]):
 
     def random_state(self) -> Coloring:
         # TODO:
-        raise NotImplementedError("random_state")   # remove this line when you are done
+
+        colors = [];
+        for i in range(self.n):
+            colors.append(random.randrange(self.k));
+        return colors;  
+
 
     def neighbors(self, c: Coloring) -> list[Coloring]:
         # TODO: give one node another color: n * (k - 1) neighbors.
-        raise NotImplementedError("neighbors")   # remove this line when you are done
+
+        result = [];
+        for i in range(self.n):
+            for color in range(self.k):
+                if (color != c[i]):
+                    neighbor = c.copy();
+                    neighbor[i] = color;
+                    result.append(neighbor);
+        return result;
 
     def random_individual(self) -> Coloring:
         return self.random_state()
@@ -41,8 +60,32 @@ class GraphColoring(OptimizationProblem[Coloring], GeneticProblem[Coloring]):
     def crossover(self, parent1: Coloring, parent2: Coloring) -> Coloring:
         # TODO: uniform crossover: each node takes its color from either parent,
         #       at random.
-        raise NotImplementedError("crossover")   # remove this line when you are done
+
+        child = [];
+        for i in range(self.n):
+            x = random.random();
+            if (x < 0.5):
+                child.append(parent1[i]);
+            else:
+                child.append(parent2[i]);
+        return child;
+
 
     def mutate(self, c: Coloring) -> Coloring:
         # TODO: give one random node a random color.
-        raise NotImplementedError("mutate")   # remove this line when you are done
+
+        mutated = c.copy();
+
+        if (self.n == 0):
+            return mutated;
+        if (self.k <= 1):
+            return mutated;
+
+        index = random.randrange(self.n);
+        new_color = random.randrange(self.k);
+        
+        while (new_color == mutated[index]):
+            new_color = random.randrange(self.k);
+        mutated[index] = new_color;
+
+        return mutated;

@@ -26,27 +26,56 @@ class Knapsack(OptimizationProblem[Selection], GeneticProblem[Selection]):
         """The total value if the items fit; if they do not, minus the excess weight, so that
         any candidate that fits beats any candidate that does not."""
         # TODO:
-        raise NotImplementedError("fitness")   # remove this line when you are done
+
+        weight = self.total_weight(s);
+        if (weight <= self.capacity):
+            return self.total_value(s);
+        else:
+            return - (weight - self.capacity);
+        
 
     def cost(self, s: Selection) -> float:
         # TODO:
-        raise NotImplementedError("cost")   # remove this line when you are done
+
+        return - self.fitness(s);
+
 
     def random_state(self) -> Selection:
         # TODO: each item taken with probability 1/2.
-        raise NotImplementedError("random_state")   # remove this line when you are done
+
+        return [random.choice([0, 1]) for _ in range(len(self.weights))];
 
     def neighbors(self, s: Selection) -> list[Selection]:
         # TODO: take or leave one item more: one neighbor per item.
-        raise NotImplementedError("neighbors")   # remove this line when you are done
+
+        result = [];
+        for i in range(len(s)):
+            neighbor = s.copy();
+            neighbor[i] = 1 - neighbor[i];
+            result.append(neighbor);
+        return result;
+
 
     def random_individual(self) -> Selection:
         return self.random_state()
 
     def crossover(self, parent1: Selection, parent2: Selection) -> Selection:
         # TODO: one-point crossover.
-        raise NotImplementedError("crossover")   # remove this line when you are done
+
+        if (len(parent1) < 2):
+            return parent1.copy();
+    
+        point = random.randrange(1, len(parent1));
+        return parent1[:point] + parent2[point:];
+
 
     def mutate(self, s: Selection) -> Selection:
         # TODO: take or leave one random item.
-        raise NotImplementedError("mutate")   # remove this line when you are done
+
+        mutated = s.copy();
+        if (len(mutated) == 0):
+            return mutated;
+        index = random.randrange(len(mutated));
+        mutated[index] = 1 - mutated[index];
+        return mutated;
+
