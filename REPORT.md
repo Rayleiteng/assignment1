@@ -187,8 +187,44 @@ Paste here the tables printed by `python experiments.py --team N --part knapsack
 
 ## Part D: logic programming
 
+`move/3` enumerates the legal prefix lengths from 2 through the stack length
+and passes each one to `flip/3`. `gaps/2` appends the plate of size `N + 1`.
+`nadjCount/2` then walks the adjacent pairs, and `pair_gap/3` counts a gap
+whenever the sizes differ by more than 1. On legal stacks the sizes are
+distinct, so testing for a difference of 1 identifies the pairs with no gap.
+
 ### Question 7
+
+1. **Depth-first search.** With `Moves` unbound, `solve([3,1,2,4], Moves)`
+   takes `flip(2)` first and reaches `[1,3,2,4]`. The next call tries
+   `flip(2)` first as well, returning to `[3,1,2,4]`. Both states fail
+   the goal test. Prolog keeps descending into this cycle before it can
+   backtrack to a larger flip. The query reached the time limit in a bounded run.
+2. **Iterative deepening.** With `Moves` unbound, `length(Moves, _)` generates
+   lists of length 0, 1, 2, and so on. Each move in `solve/2` consumes one
+   list element. With a fixed length and finitely many legal flips at every
+   state, each round of search is finite. Every valid stack has a finite
+   solution. For each largest pancake still out of place, bring it to the top
+   when needed, then flip the unsorted prefix to put it in its final position.
+   Repeat on shorter prefixes. Some finite length therefore succeeds. All
+   smaller lengths have already been exhausted by that point, so the first
+   answer uses the fewest flips. On `[3,1,2,4]` it is `[flip(3), flip(2)]`.
+   Backtracking can produce further answers at the same or greater lengths.
+3. **Backward flip.** `flip(2, X, [1,3,2])` gives `X = [3,1,2]`.
+   `length/2` fixes the prefix length at two. The final `append/3` fixes
+   the reversed prefix to `[1,3]` and the shared suffix to `[2]`.
+   `reverse/2` relates the reversed prefix to `[3,1]`. Together these
+   relations determine `X` through the first `append/3`.
+
+### Verification
+
+`swipl check.pl` passed all 12 checks on SWI-Prolog 10.0.2. An independent
+breadth-first search and direct calculations agreed on all 154 stacks of
+size 0 through 5, covering minimum flip counts, solution replay, legal moves,
+inverse flips, and gap counts including the plate.
 
 ## Use of AI tools
 
-Which AI tools did you use, and for what? If you did not use any, say so.
+For Part D, OpenAI Codex provided an initial Prolog implementation,
+explained the predicates, helped diagnose arithmetic and recursion issues,
+verified the submitted version, and drafted the Part D report.
