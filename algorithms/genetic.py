@@ -25,7 +25,20 @@ def rank_selection(population: list[T], scores: list[float]) -> T:
     choose one with probability proportional to its rank. Works with any scores, including
     negative ones."""
     # TODO:
-    raise NotImplementedError("rank_selection")   # remove this line when you are done
+    ranked = [];
+    weights = [];
+
+    for i in range(len(population)):
+        ranked.append((scores[i], i));
+        weights.append(0)
+    ranked.sort();
+
+    for i in range(len(ranked)):
+        index = ranked[i][1];
+        weights[index] = i + 1;
+    selected = random.choices(population, weights=weights);
+    return selected[0];
+
 
 
 def evolve(problem: GeneticProblem[T], population_size: int, generations: int,
@@ -37,4 +50,42 @@ def evolve(problem: GeneticProblem[T], population_size: int, generations: int,
     initial population to the last one: generations + 1 values)."""
     # TODO: use only the four methods of GeneticProblem, so that the same evolve
     #       works for every problem.
-    raise NotImplementedError("evolve")   # remove this line when you are done
+    population = [];
+    history = [];
+    for i in range(population_size):
+        population.append(problem.random_individual());
+
+    for generation in range(generations + 1):
+        scores = [];
+
+        for individual in population:
+            scores.append(problem.fitness(individual));
+
+        best_index = 0;
+        for i in range(len(scores)):
+            if scores[i] > scores[best_index]:
+                best_index = i;
+        best_individual = population[best_index];
+        best_fitness = scores[best_index];
+        history.append(best_fitness);
+        if generation == generations:
+            break;
+        ranked = [];
+        for i in range(len(population)):
+            ranked.append((scores[i], i));
+        ranked.sort(reverse=True);
+
+        new_population = [];
+        for i in range(elite):
+            index = ranked[i][1];
+            new_population.append(population[index]);
+        
+        while len(new_population) < population_size:
+            parent1 = select(population, scores);
+            parent2 = select(population, scores);
+            child = problem.crossover(parent1, parent2);
+            if random.random() < mutation_rate:
+                child = problem.mutate(child);
+            new_population.append(child);
+        population = new_population;
+    return best_individual, history

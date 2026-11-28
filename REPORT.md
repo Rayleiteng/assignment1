@@ -176,14 +176,54 @@ stack: 5 7 4 3 2 1 6 8
 
 ## Part C: local search and genetic algorithms
 
-Paste here the tables printed by `python experiments.py --team N --part knapsack` and
-`--part coloring`.
 
 ```
+
+=== Knapsack: 40 items, capacity 470; the optimum is 1645
+
+  algorithm                                      result  seconds
+  hill climbing                              1209 (73.5%)     0.00
+  stochastic hill climbing                   1100 (66.9%)     0.00
+  random restart, 30 hill climbings          1441 (87.6%)     0.01
+  random restart, 30 stochastic              1399 (85.0%)     0.01
+  local beam search, k = 5                   1448 (88.0%)     0.00
+  local beam search, k = 20                  1295 (78.7%)     0.00
+  evolve, tournaments of 3                   1621 (98.5%)     0.14
+  evolve, rank selection                     1641 (99.8%)     0.64
+
+
+=== Graph coloring: 40 nodes, 135 edges, 4 colors
+
+  algorithm                                      result  seconds
+  hill climbing                              4 conflicts     0.01
+  stochastic hill climbing                   2 conflicts     0.01
+  random restart, 30 hill climbings          2 conflicts     0.18
+  random restart, 30 stochastic              2 conflicts     0.25
+  local beam search, k = 5                   3 conflicts     0.03
+  local beam search, k = 20                  3 conflicts     0.11
+  evolve, tournaments of 3                   0 conflicts     0.16
+  evolve, rank selection                     3 conflicts     0.63
 
 ```
 
 ### Questions 5 and 6
+
+**5. Knapsack and coloring.**
+
+For the knapsack problem, the genetic algorithm with rank selection worked best, reaching 1641 (99.8% of the optimum). For graph coloring, tournament selection performed better and found a solution with 0 conflicts. I think genetic algorithms worked well because they keep several solutions and try different combinations through crossover and mutation.
+
+Random restarts help the search try different starting points instead of getting stuck with just one. In our experiments, they improved hill climbing from 1209 to 1441 on knapsack and from 4 to 2 conflicts on coloring. However, they also took more time.
+
+For beam search, k = 5 actually performed better than k = 20 on knapsack (1448 vs. 1295). On coloring, both got 3 conflicts. So, keeping more candidates does not always lead to a better result.
+
+Tournament selection and rank selection also had different results. Rank selection was better for knapsack, while tournament selection was better for coloring. This shows that the best selection method depends on the problem.
+
+
+**6. Fitness.**
+
+Giving negative fitness to overweight selections is useful because it penalizes solutions that exceed the capacity. The more overweight a selection is, the lower its fitness becomes. This encourages the algorithm to find solutions that satisfy the weight limit while still trying to get a high total value.
+
+Roulette selection cannot be used directly with this fitness function because it requires non-negative weights. Since some solutions have negative fitness, they cannot be used directly as selection probabilities. We could shift the fitness values to make them non-negative, but this would change the selection probabilities.
 
 ## Part D: logic programming
 
@@ -224,6 +264,9 @@ size 0 through 5, covering minimum flip counts, solution replay, legal moves,
 inverse flips, and gap counts including the plate.
 
 ## Use of AI tools
+
+For Part C, OpenAI ChatGPT was used to explain the assignment requirements
+and algorithm concepts, help develop and debug and review the codes. 
 
 For Part D, OpenAI Codex provided an initial Prolog implementation,
 explained the predicates, helped diagnose arithmetic and recursion issues,
