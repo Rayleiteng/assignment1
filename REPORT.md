@@ -12,8 +12,11 @@
 
 ## Part A: search algorithms
 
-Briefly describe how your `ida_star_search` and `bidirectional_search` work, and any design
-decisions you made. Do all the tests of part A pass?
+**A2. IDA\*.** `ida_star_search` runs depth-first search with a bound on `f = g + h`, starting at the heuristic value of the initial state. It prunes nodes above the bound and skips states already on the current path. If a pass finds no goal, the smallest score that exceeded the bound becomes the next bound. If there is no such score, the search returns `None`.
+
+**A3. Bidirectional search.** `bidirectional_search` runs breadth-first search forward from the start and backward from the goal using predecessor links. It expands the smaller frontier one full layer at a time. If several states connect the two searches in that layer, it chooses the one with the smallest sum of depths. It then follows the backward parent links toward the goal and adds the actual cost of each forward action, so the result reports the true cost of the minimum-step path.
+
+**Tests.** All 11 Part A tests passed with `python -m unittest tests.test_informed tests.test_bidirectional`.
 
 ## Part B: the pancake problem
 
